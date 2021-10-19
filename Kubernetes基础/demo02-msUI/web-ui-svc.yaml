@@ -1,0 +1,20 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: web-ui-svc
+  namespace: demo
+
+  labels:
+    app: web-ui-svc
+  annotations:
+    kubesphere.io/creator: admin
+spec:
+  ports:
+    - name: http-80
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 31100
+  selector:
+    app: member-site-ui
+  type: NodePort

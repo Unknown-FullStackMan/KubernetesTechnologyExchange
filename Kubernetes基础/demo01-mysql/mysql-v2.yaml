@@ -1,0 +1,35 @@
+apiVersion: apps/v1             #apiserver的版本
+kind: Deployment                #副本控制器deployment，管理pod和RS
+metadata:
+  name: mysql-v2                #deployment的名称，全局唯一
+  namespace: demo               #部署到某个命名空间
+spec:
+  replicas: 1                   #Pod副本期待数量#容器内挂载点名称
+  selector:
+    matchLabels:                
+      app: mysql-v2             #符合目标的Pod拥有此标签          
+  template:                     #根据此模板创建Pod的副本（实例）
+    metadata:
+      labels:
+        app: mysql-v2           #Pod副本的标签
+    spec:
+      containers:       #Pod里容器的定义部分
+      - name: mysql     #容器的名称
+        image: mysql:5.7     #容器对应的docker镜像
+        volumeMounts:        #容器内挂载点的定义部分    
+        - name: mysql-data   #容器内挂载点名称
+          mountPath: /var/lib/mysql      #容器内mysql的数据目录
+        - name: mysql-logs
+          mountPath: /var/log/mysql      #容器内mysql的日志目录
+        ports:
+        - containerPort: 3306            #容器暴露的端口号
+        env:                             #写入到容器内的环境容量
+        - name: MYSQL_ROOT_PASSWORD      #定义了一个mysql的root密码的变量
+          value: "123456"
+      volumes:                           #本地需要挂载到容器里的数据卷定义部分
+      - name: mysql-data
+        hostPath:
+          path: /data/mysql/data         #本地存放mysql数据的目录
+      - name: mysql-logs
+        hostPath:
+          path: /data/mysql/logs         #本地存入mysql日志的目录

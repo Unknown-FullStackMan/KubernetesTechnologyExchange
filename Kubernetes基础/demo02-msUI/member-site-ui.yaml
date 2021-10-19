@@ -1,0 +1,88 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: member-site-ui
+  namespace: demo
+  labels:
+    app: member-site-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: member-site-ui
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: member-site-ui
+    spec:
+      containers:
+        - name: container-rockfk
+          image: >-
+            69.234.235.70:30002/member-site/web-ui:SNAPSHOT-dev-4.2.0.0-containerized-5
+          ports:
+            - name: http-ms-ui-80
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: USER_API_HOST
+              value: 69.234.235.70
+            - name: USER_API_PORT
+              value: '31101'
+            - name: SITE_API_HOST
+              value: 69.234.235.70
+            - name: SITE_API_PORT
+              value: '31101'
+            - name: JOB_API_HOST
+              value: 69.234.235.70
+            - name: JOB_API_PORT
+              value: '31103'
+            - name: BILL_API_HOST
+              value: 69.234.235.70
+            - name: BILL_API_PORT
+              value: '31104'
+            - name: PAY_API_HOST
+              value: xx
+            - name: PAY_API_PORT
+              value: '2054'
+          resources:
+            limits:
+              cpu: 50m
+              memory: 50Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 5
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      imagePullSecrets:
+        - name: harbor-member-site
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
